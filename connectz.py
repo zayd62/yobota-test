@@ -87,7 +87,7 @@ def legal_game(path):
     # to see if the game is valid a "line" of the same type needs to be formed
     # it can be formed horizontally, vertically and diagonally
     # as long as a "line" can be formed at least once, a game is "legal"
-    # so check if either first_line_int[0] or first_line_int[1] >= first_line_int[2] to be vali
+    # so check if either first_line_int[0] or first_line_int[1] >= first_line_int[2] to be valid
 
     if first_line_int[0] >= first_line_int[2] or first_line_int[1] >= first_line_int[2]:
         return True
@@ -134,7 +134,7 @@ def print_output_code(code):
     This function is responsible for printing the output code
 
     Args:
-        code (str): the output code to print
+        code (int): the output code to print
     """
     print(code)
     sys.exit(0)
@@ -173,19 +173,21 @@ def main():
 
     # now attempt to load file. function returns a boolean. if false, then file does not exist
     if not load_text_file(sys.argv[1]):
-        print_output_code("9")
+        print_output_code(9)
 
     # now to validate the input file, if false, file is in invalid format
     if not validate_file_format(sys.argv[1]):
-        print_output_code("8")
+        print_output_code(8)
 
     # now to check if the game is legal. i.e. the game can be won.
     if not legal_game(sys.argv[1]):
-        print_output_code("7")
+        print_output_code(7)
 
     # check to see if there are any illegal column
     if not legal_column(sys.argv[1]):
-        print_output_code("6")
+        print_output_code(6)
+
+    # check to see if there are any illegal rows
 
     # once all the checks have passed, you can then
 
