@@ -42,7 +42,10 @@ def validate_file_format(path):
 
     A valid format looks like the following:
 
-    ``1 2 3``
+    `1 2 3` where
+    - 1: width of the board (column)
+    - 2: height of the board (row)
+    - 3: length of line (vertical, horizontal or diagonal) needed to win
 
     Args:
         path (str): path to the game file
@@ -51,13 +54,12 @@ def validate_file_format(path):
         bool: true if file follows the format, false if it does not
     """
 
-    with open(path, 'r') as file:
-        first_line = file.readline().split(" ")
+    first_line = extract_config(path)
 
-        if len(first_line) == 3:
-            return True
-        else:
-            return False
+    if len(first_line) == 3:
+        return True
+    else:
+        return False
 
 
 def legal_game(path):
@@ -77,23 +79,43 @@ def legal_game(path):
     Returns:
         bool: True if the game can be won. false otherwise
     """
-    with open(path, 'r') as file:
-        first_line = file.readline().split(" ")
+    first_line = extract_config(path)
 
-        # first_line is a list of numbers of type string so convert to integers
-        first_line_int = [int(i) for i in first_line]
+    # first_line is a list of numbers of type string so convert to integers
+    first_line_int = [int(i) for i in first_line]
 
-        # to see if the game is valid a "line" of the same type needs to be formed
-        # it can be formed horizontally, vertically and diagonally
-        # as long as a "line" can be formed at least once, a game is "legal"
-        # so check if either first_line_int[0] or first_line_int[1] >= first_line_int[2] to be vali
+    # to see if the game is valid a "line" of the same type needs to be formed
+    # it can be formed horizontally, vertically and diagonally
+    # as long as a "line" can be formed at least once, a game is "legal"
+    # so check if either first_line_int[0] or first_line_int[1] >= first_line_int[2] to be vali
 
-        if first_line_int[0] >= first_line_int[2] or first_line_int[1] >= first_line_int[2]:
-            return True
-        else:
-            return False
+    if first_line_int[0] >= first_line_int[2] or first_line_int[1] >= first_line_int[2]:
+        return True
+    else:
+        return False
 
 
+def legal_column(path):
+    """
+    Checks the file to see if they are any illegal columns
+
+    An illegal column is when you are trying to put a counter into a column that does not exist
+
+    For example, for a legal game with specification `3 4 3`, if there is a move `5`, then this is an illegal column as
+    you are trying to insert into column 5 when there is only 3 columns
+
+    Assumes that the game is leha;
+
+    Args:
+        path (str): path to the text file
+
+    Returns:
+        bool: True if all the columns are legal, False otherwise
+    """
+    pass
+
+
+# helper functions, any code that is used multiple times will be converted into a function
 def print_output_code(code):
     """
     This function is responsible for printing the output code
@@ -103,6 +125,21 @@ def print_output_code(code):
     """
     print(code)
     sys.exit(0)
+
+
+def extract_config(path):
+    """
+    Helper function used to extract the config from a text file
+    
+    This does not do any validation of the config, it simply just extracts the first line
+    Args:
+        path (str): the path to the game config 
+
+    Returns:
+        List[str]: an string array with the config.
+    """
+    with open(path, 'r') as file:
+        return file.readline().split(" ")
 
 
 def main():
@@ -132,8 +169,12 @@ def main():
     # now to check if the game is legal. i.e. the game can be won.
     if not legal_game(sys.argv[1]):
         print_output_code("7")
-    else:
-        print("legal")
+
+    # check to see if there are any illegal column
+    if not legal_column(sys.argv[1]):
+        print_output_code("6")
+
+    # once all the checks have passed, you can then
 
 
 if __name__ == '__main__':
