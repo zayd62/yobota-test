@@ -16,7 +16,15 @@ class ConnectBoard:
         self.path = path
 
 
-# end of class "ConnectBoard"
+def print_output_code(code):
+    """
+    This function is responsible for printing the output code
+
+    Args:
+        code (str): the output code to print
+    """
+    print(code)
+    sys.exit(0)
 
 if __name__ == '__main__':
     # file is being run directly not as an imported module
