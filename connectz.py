@@ -29,8 +29,8 @@ def load_text_file(path):
         bool: true if file was loaded successfully, false if file not found
     """
     try:
-        open(path, 'r')
-        return True
+        with open(path, 'r') as file:
+            return True
 
     except FileNotFoundError:
         return False
@@ -51,13 +51,13 @@ def validate_file_format(path):
         bool: true if file follows the format, false if it does not
     """
 
-    file = open(path, 'r')
-    first_line = file.readline().split(" ")
+    with open(path, 'r') as file:
+        first_line = file.readline().split(" ")
 
-    if len(first_line) == 3:
-        return True
-    else:
-        return False
+        if len(first_line) == 3:
+            return True
+        else:
+            return False
 
 
 def print_output_code(code):
@@ -91,11 +91,17 @@ def main():
     if not load_text_file(sys.argv[1]):
         print_output_code("9")
 
-    # now to validate the input file
+    # now to validate the input file, if false, file is in invalid format
     if not validate_file_format(sys.argv[1]):
         print_output_code("8")
     else:
         print("valid")
+
+    # now to check if the game is legal. i.e. the game can be won.
+    # file with `3 3 4` is illegal as in a 3x3 board, you cant get 4 in a row
+    # file with `7 7 4` is legal as in a 7x7 board, you can get 4 in a row
+
+
 
 
 if __name__ == '__main__':
