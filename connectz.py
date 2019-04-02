@@ -16,6 +16,24 @@ class ConnectBoard:
         self.path = path
 
 
+def load_text_file(path):
+    """
+    Loads file from path
+
+    Args:
+        path (str): the path to the text file
+
+    Returns:
+        bool: true if file was loaded successfully, false if file not found
+    """
+    try:
+        open(path, 'r')
+        return True
+
+    except FileNotFoundError:
+        return False
+
+
 def print_output_code(code):
     """
     This function is responsible for printing the output code
@@ -41,6 +59,9 @@ def main():
     if len(sys.argv) != 2:
         print("Provide one input file")
         sys.exit(0)
+    # now attempt to load file. function returns a boolean. if false, then file does not exist
+    if not load_text_file(sys.argv[1]):
+        print_output_code("9")
 if __name__ == '__main__':
     # file is being run directly not as an imported module
     main()
