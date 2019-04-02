@@ -60,6 +60,40 @@ def validate_file_format(path):
             return False
 
 
+def legal_game(path):
+    """
+    checks to make sure that the game is legal.
+
+    A legal game is one where you can get the counters in a row.
+
+    - file with `3 3 4` is illegal as in a 3x3 board, you cant get 4 in a row
+    - file with `7 7 4` is legal as in a 7x7 board, you can get 4 in a row
+
+    This assumes that the file is in the valid format
+
+    Args:
+        path (str): path to game file
+
+    Returns:
+        bool: True if the game can be won. false otherwise
+    """
+    with open(path, 'r') as file:
+        first_line = file.readline().split(" ")
+
+        # first_line is a list of numbers of type string so convert to integers
+        first_line_int = [int(i) for i in first_line]
+
+        # to see if the game is valid a "line" of the same type needs to be formed
+        # it can be formed horizontally, vertically and diagonally
+        # as long as a "line" can be formed at least once, a game is "legal"
+        # so check if either first_line_int[0] or first_line_int[1] >= first_line_int[2] to be vali
+
+        if first_line_int[0] >= first_line_int[2] or first_line_int[1] >= first_line_int[2]:
+            return True
+        else:
+            return False
+
+
 def print_output_code(code):
     """
     This function is responsible for printing the output code
@@ -94,14 +128,12 @@ def main():
     # now to validate the input file, if false, file is in invalid format
     if not validate_file_format(sys.argv[1]):
         print_output_code("8")
-    else:
-        print("valid")
 
     # now to check if the game is legal. i.e. the game can be won.
-    # file with `3 3 4` is illegal as in a 3x3 board, you cant get 4 in a row
-    # file with `7 7 4` is legal as in a 7x7 board, you can get 4 in a row
-
-
+    if not legal_game(sys.argv[1]):
+        print_output_code("7")
+    else:
+        print("legal")
 
 
 if __name__ == '__main__':
