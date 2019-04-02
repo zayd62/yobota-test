@@ -26,6 +26,21 @@ def print_output_code(code):
     print(code)
     sys.exit(0)
 
+def main():
+    """
+    Function that is called if file 'connectz.py' is being run directly.
+
+    This function processes an input file and creates a 'Connect z' board and checks the game to see if it is a valid
+    game or not
+    """
+
+    # 'sys.argv' is a list which contains the file name in sys.argv[0] and command line arguments in each index position
+    # we need to check make sure that only one command line argument is passed, the game file so len(sys.argv != 2) == 2
+    # otherwise we print message stating to provide one input file
+
+    if len(sys.argv) != 2:
+        print("Provide one input file")
+        sys.exit(0)
 if __name__ == '__main__':
     # file is being run directly not as an imported module
     main()
