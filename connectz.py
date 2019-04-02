@@ -54,9 +54,9 @@ def validate_file_format(path):
         bool: true if file follows the format, false if it does not
     """
 
-    first_line = extract_config(path)
+    config = extract_config(path)
 
-    if len(first_line) == 3:
+    if len(config) == 3:
         return True
     else:
         return False
@@ -79,10 +79,10 @@ def legal_game(path):
     Returns:
         bool: True if the game can be won. false otherwise
     """
-    first_line = extract_config(path)
+    config = extract_config(path)
 
     # first_line is a list of numbers of type string so convert to integers
-    first_line_int = [int(i) for i in first_line]
+    first_line_int = [int(i) for i in config]
 
     # to see if the game is valid a "line" of the same type needs to be formed
     # it can be formed horizontally, vertically and diagonally
