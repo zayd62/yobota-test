@@ -104,7 +104,7 @@ def legal_column(path):
     For example, for a legal game with specification `3 4 3`, if there is a move `5`, then this is an illegal column as
     you are trying to insert into column 5 when there is only 3 columns
 
-    Assumes that the game is leha;
+    Assumes that the game is legal;
 
     Args:
         path (str): path to the text file
@@ -112,7 +112,20 @@ def legal_column(path):
     Returns:
         bool: True if all the columns are legal, False otherwise
     """
-    pass
+
+    # get the config
+    config = extract_config(path)
+    config_int = [int(i) for i in config]
+
+    # go through the file and see if there are any value greater than config_int[0]
+
+    with open(path, 'r') as file:
+        file.readline()
+
+        for i in file:
+            if int(i) > config_int[0]:
+                return False
+    return True
 
 
 # helper functions, any code that is used multiple times will be converted into a function
