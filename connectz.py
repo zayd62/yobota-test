@@ -120,12 +120,48 @@ def legal_column(path):
     # go through the file and see if there are any value greater than config_int[0]
 
     with open(path, 'r') as file:
-        file.readline()
+        file.readline() # first line is the config so we move pointer to next line
 
         for i in file:
             if int(i) > config_int[0]:
                 return False
     return True
+
+
+def legal_row(path):
+    """
+    Checks the file to see if there are any illegal rows
+
+    An illegal row is when a column is full and you are trying to insert it into that column.
+
+    Works by keeping track of the number of times a move appears and if a move exceeds the number of rows,
+    the function  will then return false
+
+    Assumes that the columns are legal
+    Args:
+        path (str): the path to the file
+
+    Returns:
+        bool: true if the rows are legal, false otherwise
+    """
+    # get the config
+    config = extract_config(path)
+    config_int = [int(i) for i in config]
+
+    with open(path, 'r') as file:
+        file.readline() # first line is the config so we move pointer to next line
+
+        # create list for keeping track the number of times a counter is inserted
+        # config_int[0] stores the number of rows
+        # index position 0 keeps track of the column 1
+        row_track = [0] * (config_int[0] + 1)
+        for i in file:
+            row_track[int(i)] += 1
+            if row_track[int(i)] > config_int[0]:
+                return False
+    return True
+
+
 
 
 # helper functions, any code that is used multiple times will be converted into a function
@@ -188,6 +224,8 @@ def main():
         print_output_code(6)
 
     # check to see if there are any illegal rows
+    if not legal_row(sys.argv[1]):
+        print_output_code(5)
 
     # once all the checks have passed, you can then
 
