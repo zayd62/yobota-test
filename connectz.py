@@ -59,7 +59,7 @@ class ConnectBoard:
         for i in range(self.config[0] - 1, -1, -1):
             if self.board[i][column - 1] == 0:
                 self.board[i][column - 1] = value
-                result = self.win_horizontal_left(column - 1, i) # stores the result of the win check
+                result = self.simulate_game(column - 1, i)  # stores the result of the win check
                 return
 
     def validate_file(self):
@@ -96,6 +96,11 @@ class ConnectBoard:
         # check if there is a game history
         if not self.no_history():
             self.print_output_code(3)
+
+    def simulate_game(self, column, row):
+        result_horizontal_left = self.win_horizontal_left(column, row)
+        result_horizontal_right = self.win_horizontal_right(column, row)
+        return [result_horizontal_left, result_horizontal_right]
 
     # below are all the win checking helper functions
 
@@ -161,6 +166,67 @@ class ConnectBoard:
         except IndexError:
             return False
 
+    def win_horizontal_right(self, column, row):
+        """
+        This function given a column and a row, check to see if there is a solution in the horizontal right of from the
+        starting point.
+
+
+        A horizontal right victory looks like the following (starting from cell 4,7)::
+
+            .---.---.---.---.---.---.---.
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
+            '---'---'---'---'---'---'---'
+
+        Args:
+            column (int): the point in the column where you start looking
+            row (int): the point in the row where you start looking
+
+        Returns:
+            bool: true if there is a victory, false otherwise
+        """
+
+        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
+        if self.player_one_move:
+            number_to_find = 1
+        else:
+            number_to_find = 2
+
+        # self.config[2] determines the number of counters needed to win so we need to check that many times
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # if found, return True, false otherwise
+
+        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
+        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
+        # that does not exist which will then raise an IndexError. if this happens, we return false
+        # as a win cannot happen
+
+        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
+        # means checking a cell that does not exist in this example
+
+        try:
+            for i in range(0, self.config[2]):
+                if column < 0:
+                    return False
+                if self.board[row][column] == number_to_find:
+                    column += 1
+                else:
+                    return False
+            return True
+        except IndexError:
+            return False
 
     # below are all the validation helper methods that are run before the game history is simulated
 
@@ -341,7 +407,6 @@ def main():
         # build the board based on the config
         board.generate_board()
 
-        # need to modify below to get illegal continue incomplete and draw
         for i in board.history:
             if board.player_one_move:
                 board.insert_into_board(1, i)
@@ -350,7 +415,6 @@ def main():
 
             board.player_one_move = not board.player_one_move
         print("board built")
-
 
 
 if __name__ == '__main__':
