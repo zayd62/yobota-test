@@ -58,14 +58,19 @@ class ConnectBoard:
     def convert_to_int(self):
         """
         When reading from a file, python reads it as a string but we need them as ints.
-        Since we store as lists, we need to convert into list
+        Since we store the file data in lists, we need to convert all elements in the list from
+        string to ints
 
         We can only convert the data in the file to an int only if the file is validated as well as the format
+
+        Makes no assumption on the validity of the data
         """
         temp = [int(i) for i in self.config]
         self.config = temp
         temp = [int(j) for j in self.history]
         self.history = temp
+
+    # below are all the validation helper methods that are run before the game history is simulated
 
     def validate_file(self):
         """
@@ -80,16 +85,15 @@ class ConnectBoard:
         except FileNotFoundError:
             return False
 
-    # below are all the validation helper methods that are run before the game history is simulated
-
-    def validate_file_format(self):
+    def validate_config(self):
         """
         This validates the file to make sure it is in the correct format according to the specification.
         It validates the config
 
         A valid format looks like the following:
 
-        `1 2 3` where
+        `1 2 3` where:
+
         - 1: width of the board (column)
         - 2: height of the board (row)
         - 3: length of line (vertical, horizontal or diagonal) needed to win
@@ -115,7 +119,7 @@ class ConnectBoard:
         This assumes that the file is in the valid format
 
         Returns:
-            bool: True if the game can be won. false otherwise
+            bool: True if the game is legal. false otherwise
         """
         # to see if the game is valid a "line" of the same type needs to be formed
         # it can be formed horizontally, vertically and diagonally
@@ -187,28 +191,41 @@ def main():
     """
     This function is ran if the file is executed as a script. If imported, this will not run
     """
+
+    # start of file validation
+
+    # check if correct arguments are provided
     if len(sys.argv) != 2:
         print("Provide one input file")
         sys.exit(0)
     else:
+
+        # create ConnectBoard object
         board = ConnectBoard(sys.argv[1])
 
+        # check if game history file exists
         if not board.validate_file():
             board.print_output_code(9)
 
+        # extract the data from file and store in ConnectBoard object
         board.extract_data_from_file()
 
-        if not board.validate_file_format():
+        # check if the config is valid
+        if not board.validate_config():
             board.print_output_code(8)
 
+        # convert data from string to int
         board.convert_to_int()
 
+        # checks if the game can actually be won
         if not board.validate_legal_game():
             board.print_output_code(7)
 
+        # checks if the columns are valid
         if not board.validate_legal_column():
             board.print_output_code(6)
 
+        # checks if the rows are valid
         if not board.validate_legal_row():
             board.print_output_code(5)
 
