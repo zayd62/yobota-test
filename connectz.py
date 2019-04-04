@@ -61,49 +61,44 @@ class ConnectBoard:
                 self.board[i][column - 1] = value
                 return
 
-    # below are miscellaneous helper methods used either on their own or in other methods
-
-    @staticmethod
-    def print_output_code(code):
+    def validate_file(self):
         """
-        This function is responsible for printing the output code
-
-        Args:
-            code (int): the output code to print
+        A wrapper function that calls all the helper validation methods and if any of the validation methods fail
+        the appropriate output code will be printed to terminal
         """
-        print(code)
-        sys.exit(0)
+        # check if game history file exists
+        if not self.validate_file_existence():
+            self.print_output_code(9)
 
-    def extract_data_from_file(self):
-        """
-        Extracts the config data as well as the game history. Makes no assumptions on the validity of the game
-        """
-        with open(self.path, 'r') as file:
-            # code to extract the config and store as a list
-            self.config = file.readline().split(" ")
+        # extract the data from file and store in ConnectBoard object
+        self.extract_data_from_file()
 
-            # code to extract the game history and store as a list
-            for i in file:
-                self.history.append(i)
+        # check if the config is valid
+        if not self.validate_config():
+            self.print_output_code(8)
 
-    def convert_to_int(self):
-        """
-        When reading from a file, python reads it as a string but we need them as ints.
-        Since we store the file data in lists, we need to convert all elements in the list from
-        string to ints
+        # convert data from string to int
+        self.convert_to_int()
 
-        We can only convert the data in the file to an int only if the file is validated as well as the format
+        # checks if the game can actually be won
+        if not self.validate_legal_game():
+            self.print_output_code(7)
 
-        Makes no assumption on the validity of the data
-        """
-        temp = [int(i) for i in self.config]
-        self.config = temp
-        temp = [int(j) for j in self.history]
-        self.history = temp
+        # checks if the columns are valid
+        if not self.validate_legal_column():
+            self.print_output_code(6)
+
+        # checks if the rows are valid
+        if not self.validate_legal_row():
+            self.print_output_code(5)
+
+        # check if there is a game history
+        if not self.no_history():
+            self.print_output_code(3)
 
     # below are all the validation helper methods that are run before the game history is simulated
 
-    def validate_file(self):
+    def validate_file_existence(self):
         """
         Checks to see if the path is a file that exists
 
@@ -215,6 +210,46 @@ class ConnectBoard:
         else:
             return True
 
+    # below are miscellaneous helper methods used either on their own or in other methods
+
+    @staticmethod
+    def print_output_code(code):
+        """
+        This function is responsible for printing the output code
+
+        Args:
+            code (int): the output code to print
+        """
+        print(code)
+        sys.exit(0)
+
+    def extract_data_from_file(self):
+        """
+        Extracts the config data as well as the game history. Makes no assumptions on the validity of the game
+        """
+        with open(self.path, 'r') as file:
+            # code to extract the config and store as a list
+            self.config = file.readline().split(" ")
+
+            # code to extract the game history and store as a list
+            for i in file:
+                self.history.append(i)
+
+    def convert_to_int(self):
+        """
+        When reading from a file, python reads it as a string but we need them as ints.
+        Since we store the file data in lists, we need to convert all elements in the list from
+        string to ints
+
+        We can only convert the data in the file to an int only if the file is validated as well as the format
+
+        Makes no assumption on the validity of the data
+        """
+        temp = [int(i) for i in self.config]
+        self.config = temp
+        temp = [int(j) for j in self.history]
+        self.history = temp
+
 
 # end of class "Connect Board"
 
@@ -234,37 +269,8 @@ def main():
         # create ConnectBoard object
         board = ConnectBoard(sys.argv[1])
 
-        # check if game history file exists
-        if not board.validate_file():
-            board.print_output_code(9)
-
-        # extract the data from file and store in ConnectBoard object
-        board.extract_data_from_file()
-
-        # check if the config is valid
-        if not board.validate_config():
-            board.print_output_code(8)
-
-        # convert data from string to int
-        board.convert_to_int()
-
-        # checks if the game can actually be won
-        if not board.validate_legal_game():
-            board.print_output_code(7)
-
-        # checks if the columns are valid
-        if not board.validate_legal_column():
-            board.print_output_code(6)
-
-        # checks if the rows are valid
-        if not board.validate_legal_row():
-            board.print_output_code(5)
-
-        # check if there is a game history
-        if not board.no_history():
-            board.print_output_code(3)
-
-        # all validation checks are complete.
+        # validate the game file
+        board.validate_file()
 
         # build the board based on the config
         board.generate_board()
