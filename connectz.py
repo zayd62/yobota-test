@@ -24,11 +24,42 @@ class ConnectBoard:
         self.history = []  # has the game history
         self.board = []  # stores the board as a nested list
         self.winner = ""  # stores the winner
+        self.player_one_move = True
 
     def generate_board(self):
+        """
+        creates the connect board using the dimensions
+        """
         row = [0] * self.config[0]
         for i in range(0, self.config[1]):
-            self.board.append(row)
+            self.board.append(row[:])
+
+    def insert_into_board(self, value, column):
+        """
+        Inserts a "counter" into the board. The "counter" is the player number (either one or two) and is based on value
+        Since lists start at index position 0 and column numbers start at 1, all column numbers will automatically be
+        subtracted by 1. We only insert into a colun where there is a zero
+
+        No checks for inserting into a row that does not exist as that should have been validated already and will
+        throw an error
+
+        Args:
+            value (int): the value to be used as the "counter". usually a 1 or 2
+            column (int): the column number a "counter" is inserted into.
+        """
+
+        # to get a value in a position, we do self,board[row][column]
+        # we need to insert into a column from the bottom up so we need to loop through all the rows where
+        # the number of rows is self.config[0]
+        # to obtain the column we use the "column" argument
+        # to get the value in a column position, we do self.board[i][column]
+        # i is defined below in the for loop and represents the row
+        # we start from the bottom row which is the maximum number of rows (subtract 1 as list index start at 0)
+        # finish at 0 which will give us the top row. and step through "-1" times so we go through each row
+        for i in range(self.config[0] - 1, -1, -1):
+            if self.board[i][column - 1] == 0:
+                self.board[i][column - 1] = value
+                return
 
     # below are miscellaneous helper methods used either on their own or in other methods
 
@@ -238,6 +269,12 @@ def main():
         # build the board based on the config
         board.generate_board()
 
+        for i in board.history:
+            if board.player_one_move:
+                board.insert_into_board(1, i)
+            else:
+                board.insert_into_board(2, i)
+            board.player_one_move = not board.player_one_move
 
 
 if __name__ == '__main__':
