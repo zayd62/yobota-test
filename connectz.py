@@ -20,10 +20,17 @@ class ConnectBoard:
     def __init__(self, path):
 
         self.path = path
-        self.config = []  # has the board config
+        self.config = []  # has the board config.
         self.history = []  # has the game history
-        self.board = ""  # stores the board as a nested list
+        self.board = []  # stores the board as a nested list
         self.winner = ""  # stores the winner
+
+    def generate_board(self):
+        row = [0] * self.config[0]
+        for i in range(0, self.config[1]):
+            self.board.append(row)
+
+    # below are miscellaneous helper methods used either on their own or in other methods
 
     @staticmethod
     def print_output_code(code):
@@ -161,6 +168,18 @@ class ConnectBoard:
                 return False
         return True
 
+    def no_history(self):
+        """
+        If the file has no game history and just a config, then it is considered incomplete
+
+        Returns:
+            bool: True if there is no history, false otherwise
+        """
+        if len(self.history) == 0:
+            return False
+        else:
+            return True
+
 
 # end of class "Connect Board"
 
@@ -192,6 +211,16 @@ def main():
 
         if not board.validate_legal_row():
             board.print_output_code(5)
+
+        # check if there is a game history
+        if not board.no_history():
+            board.print_output_code(3)
+
+        # all validation checks are complete.
+
+        # build the board based on the config
+        board.generate_board()
+
 
 
 if __name__ == '__main__':

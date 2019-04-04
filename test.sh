@@ -11,3 +11,5 @@ echo testing illegal column, expected value: 6, obtained
 python connectz.py illegal_column.txt
 echo testing illegal row, expected value: 5, obtained
 python connectz.py illegal_row.txt
+echo testing only dimension lines, expected 3, obtained
+python connectz.py only_dimensions.txt
