@@ -160,14 +160,14 @@ class ConnectBoard:
         try:
             for i in range(0, self.config[2]):
                 if column < 0:
-                    return False
+                    return 0
                 if self.board[row][column] == number_to_find:
                     column -= 1
                 else:
-                    return False
-            return True
+                    return 0
+            return number_to_find
         except IndexError:
-            return False
+            return 0
 
     def win_horizontal_right(self, column, row):
         """
