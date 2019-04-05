@@ -12,23 +12,21 @@ class ConnectBoard:
 
     Simulates the play history and calculate a winner as well as
 
-
     Args:
         path (str): path to game history file
     """
 
     def __init__(self, path):
 
-        self.path = path
+        self.path = path  # path to the game file
         self.config = []  # has the board config.
         self.history = []  # has the game history
         self.board = []  # stores the board as a nested list
-        self.winner = ""  # stores the winner
         self.player_one_move = True
 
     def generate_empty_board(self):
         """
-        creates the connect board using the dimensions
+        creates the connect board using the dimensions in self.config
         """
         row = [0] * self.config[0]
         for i in range(0, self.config[1]):
@@ -36,9 +34,9 @@ class ConnectBoard:
 
     def insert_into_board(self, value, column):
         """
-        Inserts a "counter" into the board. The "counter" is the player number (either one or two) and is based on value
-        Since lists start at index position 0 and column numbers start at 1, all column numbers will automatically be
-        subtracted by 1. We only insert into a column where there is a zero
+        Inserts a "counter" into the board. The "counter" is the player number (either one or two) and is based on
+        the parameter ``value``. Since lists start at index position 0 and column numbers start at 1, all column
+        numbers will be subtracted by 1. We only insert into a column where there is a zero
 
         No checks for inserting into a row that does not exist as that should have been validated already and will
         throw an error
@@ -101,20 +99,16 @@ class ConnectBoard:
         """
         Given a position within the board, it finds a winner. Uses all the win checking helper functions to find a
         winner and print the appropriate output code
+
+        Note: there is no method for checking a win for vertical down as you cant insert a counter below another counter
+
         Args:
             column (int): the column number
             row (int): the row number
         """
         results = []
-        # result_horizontal_left = self.win_horizontal_left(column, row)
-        # result_horizontal_right = self.win_horizontal_right(column, row)
-        # result_vertical_down = self.win_vertical_down(column, row)
-        # result_diagonal_upper_right = self.win_diagonal_upper_right(column, row)
-        # result_diagonal_upper_left = self.win_diagonal_upper_left(column, row)
-        # result_diagonal_lower_right = self.win_diagonal_lower_right(column, row)
-        # result_diagonal_lower_left = self.win_diagonal_lower_left(column, row)
 
-        # ad the results of all the checks into an array
+        # add the results of all the win checks into an array
         results.append(self.win_horizontal_left(column, row))
         results.append(self.win_horizontal_right(column, row))
         results.append(self.win_vertical_down(column, row))
@@ -152,7 +146,7 @@ class ConnectBoard:
 
         """
 
-        # as we insert moves into the board, the move played is rewriten by a zero in self.history.
+        # as we insert moves into the board, the move played is overwritten by a zero in self.history.
         # a zero is only written if there is no winner.
         # if a winner is detected, then the winning move is not written over so the code below rewrites the
         # winning move with a zero
@@ -162,9 +156,9 @@ class ConnectBoard:
                 break
 
         # i is the index position of the winning move
-        # if there are any moves after this, then moves have been made after a game has been won whichis illegal
+        # if there are any moves after this, then moves have been made after a game has been won which illegal
 
-        # use list slicing to get all the elements after the winning move
+        # use list slicing to get all the elements after the winning move (not including the winning move).
         # we do i + 1 as index i is the winning move
         # if there are elements in the sliced list, then illegal moves have been made
         if len(self.history[(i + 1):]) == 0:
@@ -213,7 +207,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] timesin horizontal left
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -275,7 +269,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -303,8 +297,7 @@ class ConnectBoard:
         This function given a column and a row, check to see if there is a solution in the vertical down from the
         starting point.
 
-
-        A horizontal right victory looks like the following (starting from cell 4,4)::
+        A vertical down  victory looks like the following (starting from cell 4,4)::
 
             .---.---.---.---.---.---.---.
             | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -337,7 +330,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -399,7 +392,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -463,7 +456,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -527,7 +520,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -591,7 +584,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
