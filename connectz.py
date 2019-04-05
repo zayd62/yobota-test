@@ -59,7 +59,7 @@ class ConnectBoard:
         for i in range(self.config[0] - 1, -1, -1):
             if self.board[i][column - 1] == 0:
                 self.board[i][column - 1] = value
-                result = self.find_winner(column - 1, i)  # stores the result of the win check
+                self.find_winner(column - 1, i)  # stores the result of the win check
                 return
 
     def validate_file(self):
@@ -98,6 +98,13 @@ class ConnectBoard:
             self.print_output_code(3)
 
     def find_winner(self, column, row):
+        """
+        Given a position within the board, it finds a winner. Uses all the win checking helper functions to find a
+        winner and print the appropriate output code
+        Args:
+            column (int): the column number
+            row (int): the row number
+        """
         results = []
         # result_horizontal_left = self.win_horizontal_left(column, row)
         # result_horizontal_right = self.win_horizontal_right(column, row)
@@ -118,14 +125,52 @@ class ConnectBoard:
 
         # if true, player 1 won
         if 1 in results:
-            self.print_output_code(1)
+            if self.illegal_continue_check():
+                self.print_output_code(1)
+            else:
+                self.print_output_code(4)
 
         # if true, player 2 won
         elif 2 in results:
-            self.print_output_code(2)
+            if self.illegal_continue_check():
+                self.print_output_code(2)
+            else:
+                self.print_output_code(4)
+
         # neither player 1 or 2 won with this move
         else:
             pass
+
+    def illegal_continue_check(self):
+        """
+        This function checks if there is an illegal continue
+
+        An illegal continue is one where after a winner is found, another move is made
+
+        Returns:
+            bool: True if there is an illegal continue, false otherwise
+
+        """
+
+        # as we insert moves into the board, the move played is rewriten by a zero in self.history.
+        # a zero is only written if there is no winner.
+        # if a winner is detected, then the winning move is not written over so the code below rewrites the
+        # winning move with a zero
+        for i in range(0, len(self.history)):
+            if self.history[i] != 0:
+                self.history[i] = 0
+                break
+
+        # i is the index position of the winning move
+        # if there are any moves after this, then moves have been made after a game has been won whichis illegal
+
+        # use list slicing to get all the elements after the winning move
+        # we do i + 1 as index i is the winning move
+        # if there are elements in the sliced list, then illegal moves have been made
+        if len(self.history[(i + 1):]) == 0:
+            return True
+        else:
+            return False
 
     # below are all the win checking helper functions
 
@@ -362,8 +407,8 @@ class ConnectBoard:
         # that does not exist which will then raise an IndexError. if this happens, we return false
         # as a win cannot happen
 
-        # we also have ``column < 0 or row < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
+        # we also have ``column < 0 or row < 0`` because in python, a ``-1`` list index starts from the end of the list
+        # but ``-1`` means checking a cell that does not exist in this example
 
         try:
             for i in range(0, self.config[2]):
