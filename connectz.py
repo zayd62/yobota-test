@@ -98,16 +98,34 @@ class ConnectBoard:
             self.print_output_code(3)
 
     def find_winner(self, column, row):
-        result_horizontal_left = self.win_horizontal_left(column, row)
-        result_horizontal_right = self.win_horizontal_right(column, row)
-        result_vertical_down = self.win_vertical_down(column, row)
-        result_diagonal_upper_right = self.win_diagonal_upper_right(column, row)
-        result_diagonal_upper_left = self.win_diagonal_upper_left(column, row)
-        result_diagonal_lower_right = self.win_diagonal_lower_right(column, row)
-        result_diagonal_lower_left = self.win_diagonal_lower_left(column, row)
+        results = []
+        # result_horizontal_left = self.win_horizontal_left(column, row)
+        # result_horizontal_right = self.win_horizontal_right(column, row)
+        # result_vertical_down = self.win_vertical_down(column, row)
+        # result_diagonal_upper_right = self.win_diagonal_upper_right(column, row)
+        # result_diagonal_upper_left = self.win_diagonal_upper_left(column, row)
+        # result_diagonal_lower_right = self.win_diagonal_lower_right(column, row)
+        # result_diagonal_lower_left = self.win_diagonal_lower_left(column, row)
 
-        return [result_horizontal_left, result_horizontal_right, result_vertical_down]
+        # ad the results of all the checks into an array
+        results.append(self.win_horizontal_left(column, row))
+        results.append(self.win_horizontal_right(column, row))
+        results.append(self.win_vertical_down(column, row))
+        results.append(self.win_diagonal_upper_right(column, row))
+        results.append(self.win_diagonal_upper_left(column, row))
+        results.append(self.win_diagonal_lower_right(column, row))
+        results.append(self.win_diagonal_lower_left(column, row))
 
+        # if true, player 1 won
+        if 1 in results:
+            self.print_output_code(1)
+
+        # if true, player 2 won
+        elif 2 in results:
+            self.print_output_code(2)
+        # neither player 1 or 2 won with this move
+        else:
+            pass
     # below are all the win checking helper functions
 
     def win_horizontal_left(self, column, row):
@@ -741,13 +759,19 @@ def main():
         # build the board based on the config
         board.generate_empty_board()
 
-        for i in board.history:
+        # for i in board.history:
+        for i in range(0, len(board.history)):
             if board.player_one_move:
-                board.insert_into_board(1, i)
+                board.insert_into_board(1, board.history[i])
             else:
-                board.insert_into_board(2, i)
+                board.insert_into_board(2, board.history[i])
 
+            # this changes the player move. true is player 1, false is player 2
             board.player_one_move = not board.player_one_move
+
+            # if the insertion is not a winning move, you set the history to 0 to mark it as 'inserted'
+            # if the last move in the history is the winning move, they board.history[last_element] != 0
+            board.history[i] = 0
         print("board built")
 
 
