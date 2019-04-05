@@ -26,7 +26,7 @@ class ConnectBoard:
         self.winner = ""  # stores the winner
         self.player_one_move = True
 
-    def generate_board(self):
+    def generate_empty_board(self):
         """
         creates the connect board using the dimensions
         """
@@ -59,7 +59,6 @@ class ConnectBoard:
         for i in range(self.config[0] - 1, -1, -1):
             if self.board[i][column - 1] == 0:
                 self.board[i][column - 1] = value
-                result = self.simulate_game(column - 1, i)  # stores the result of the win check
                 return
 
     def validate_file(self):
@@ -97,10 +96,11 @@ class ConnectBoard:
         if not self.no_history():
             self.print_output_code(3)
 
-    def simulate_game(self, column, row):
+    def find_win(self, column, row):
         result_horizontal_left = self.win_horizontal_left(column, row)
         result_horizontal_right = self.win_horizontal_right(column, row)
-        return [result_horizontal_left, result_horizontal_right]
+        result_vertical_up = self.win_vertical_up(column, row)
+        return [result_horizontal_left, result_horizontal_right, result_vertical_down]
 
     # below are all the win checking helper functions
 
@@ -227,6 +227,69 @@ class ConnectBoard:
             return True
         except IndexError:
             return False
+
+    def win_vertical_up(self, column, row):
+        """
+        This function given a column and a row, check to see if there is a solution in the vertical up from the
+        starting point.
+
+
+        A vertical down victory looks like the following (starting from cell 7,4)::
+
+            .---.---.---.---.---.---.---.
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+            '---'---'---'---'---'---'---'
+
+        Args:
+            column (int): the point in the column where you start looking
+            row (int): the point in the row where you start looking
+
+        Returns:
+            bool: true if there is a victory, false otherwise
+        """
+
+        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
+        if self.player_one_move:
+            number_to_find = 1
+        else:
+            number_to_find = 2
+
+        # self.config[2] determines the number of counters needed to win so we need to check that many times
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times in vertical up
+        # if found, return True, false otherwise
+
+        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
+        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
+        # that does not exist which will then raise an IndexError. if this happens, we return false
+        # as a win cannot happen
+
+        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
+        # means checking a cell that does not exist in this example
+
+        try:
+            for i in range(0, self.config[2]):
+                if column < 0:
+                    return False
+                if self.board[row][column] == number_to_find:
+                    row += 1
+                else:
+                    return False
+            return True
+        except IndexError:
+            return False
+
 
     # below are all the validation helper methods that are run before the game history is simulated
 
@@ -405,7 +468,7 @@ def main():
         board.validate_file()
 
         # build the board based on the config
-        board.generate_board()
+        board.generate_empty_board()
 
         for i in board.history:
             if board.player_one_move:
