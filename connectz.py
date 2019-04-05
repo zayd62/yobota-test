@@ -101,6 +101,7 @@ class ConnectBoard:
         result_horizontal_left = self.win_horizontal_left(column, row)
         result_horizontal_right = self.win_horizontal_right(column, row)
         result_vertical_down = self.win_vertical_down(column, row)
+        result_diagonal_upper_right = self.win_diagonal_upper_right(column, row)
         result_diagonal_upper_left = self.win_diagonal_upper_left(column, row)
         return [result_horizontal_left, result_horizontal_right, result_vertical_down]
 
@@ -292,13 +293,13 @@ class ConnectBoard:
         except IndexError:
             return 0
 
-    def win_diagonal_upper_left(self, column, row):
+    def win_diagonal_upper_right(self, column, row):
         """
-        This function given a column and a row, check to see if there is a solution in the diagonal upper left from the
+        This function given a column and a row, check to see if there is a solution in the diagonal upper right from the
         starting point.
 
 
-        A diagonal upper left victory looks like the following (starting from cell 3,7)::
+        A diagonal upper right victory looks like the following (starting from cell 3,7)::
 
             .---.---.---.---.---.---.---.
             | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -356,6 +357,69 @@ class ConnectBoard:
         except IndexError:
             return 0
 
+    def win_diagonal_upper_left(self, column, row):
+        """
+        This function given a column and a row, check to see if there is a solution in the diagonal upper left from the
+        starting point.
+
+
+        A diagonal upper left victory looks like the following (starting from cell 4,7)::
+
+            .---.---.---.---.---.---.---.
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
+            :---+---+---+---+---+---+---:
+            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+            '---'---'---'---'---'---'---'
+
+        Args:
+            column (int): the point in the column where you start looking
+            row (int): the point in the row where you start looking
+
+        Returns:
+            int: player number of who won, 0 if no one won
+        """
+
+        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
+        if self.player_one_move:
+            number_to_find = 1
+        else:
+            number_to_find = 2
+
+        # self.config[2] determines the number of counters needed to win so we need to check that many times
+        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal right
+        # if found, return True, false otherwise
+
+        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
+        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
+        # that does not exist which will then raise an IndexError. if this happens, we return false
+        # as a win cannot happen
+
+        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
+        # means checking a cell that does not exist in this example
+
+        try:
+            for i in range(0, self.config[2]):
+                if column < 0:
+                    return 0
+                if self.board[row][column] == number_to_find:
+                    # this will ensure that the cell up and to the right is checked
+                    row += -1
+                    column += -1
+                else:
+                    return 0
+            return number_to_find
+        except IndexError:
+            return 0
 
     # below are all the validation helper methods that are run before the game history is simulated
 
