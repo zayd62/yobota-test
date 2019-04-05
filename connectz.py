@@ -26,7 +26,7 @@ class ConnectBoard:
         self.winner = ""  # stores the winner
         self.player_one_move = True
 
-    def generate_board(self):
+    def generate_empty_board(self):
         """
         creates the connect board using the dimensions
         """
@@ -136,7 +136,7 @@ class ConnectBoard:
             row (int): the point in the row where you start looking
 
         Returns:
-            int: player number of who won, 0 if no one won
+            bool: true if there is a victory, false otherwise
         """
 
         # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
@@ -146,7 +146,7 @@ class ConnectBoard:
             number_to_find = 2
 
         # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times in horizontal left
+        # assuming number_to_find = 1, we check for 1's, self.config[2] timesin horizontal left
         # if found, return True, false otherwise
 
         # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
@@ -160,14 +160,14 @@ class ConnectBoard:
         try:
             for i in range(0, self.config[2]):
                 if column < 0:
-                    return 0
+                    return False
                 if self.board[row][column] == number_to_find:
-                    column -= 1  # this will ensure that the cell of the left is checked next
+                    column -= 1
                 else:
-                    return 0
-            return number_to_find
+                    return False
+            return True
         except IndexError:
-            return 0
+            return False
 
     def win_horizontal_right(self, column, row):
         """
@@ -608,7 +608,7 @@ def main():
         board.validate_file()
 
         # build the board based on the config
-        board.generate_board()
+        board.generate_empty_board()
 
         for i in board.history:
             if board.player_one_move:
