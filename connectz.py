@@ -126,6 +126,7 @@ class ConnectBoard:
         # neither player 1 or 2 won with this move
         else:
             pass
+
     # below are all the win checking helper functions
 
     def win_horizontal_left(self, column, row):
@@ -180,7 +181,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     column -= 1
@@ -242,7 +243,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     column += 1  # this will ensure that the cell of the right is checked next
@@ -304,7 +305,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     row += 1  # this will ensure that the below is checked next
@@ -361,12 +362,12 @@ class ConnectBoard:
         # that does not exist which will then raise an IndexError. if this happens, we return false
         # as a win cannot happen
 
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
+        # we also have ``column < 0 or row < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
         # means checking a cell that does not exist in this example
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     # this will ensure that the cell up and to the right is checked
@@ -430,7 +431,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     # this will ensure that the cell up and to the right is checked
@@ -494,7 +495,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     # this will ensure that the cell down and to the right is checked
@@ -558,7 +559,7 @@ class ConnectBoard:
 
         try:
             for i in range(0, self.config[2]):
-                if column < 0:
+                if column < 0 or row < 0:
                     return 0
                 if self.board[row][column] == number_to_find:
                     # this will ensure that the cell down and to the right is checked
@@ -772,7 +773,20 @@ def main():
             # if the insertion is not a winning move, you set the history to 0 to mark it as 'inserted'
             # if the last move in the history is the winning move, they board.history[last_element] != 0
             board.history[i] = 0
-        print("board built")
+
+        # if program reaches here, then there are no winners
+        # only two things can happen
+
+        # incomplete: there are no winners and there are still spaces left in the board
+        # draw: there are no winners and the board is full
+
+        # goes through board and tries to find any '0's' if found, then the game can continue
+        for i in board.board:
+            if 0 in i:
+                board.print_output_code(3)
+
+        # no winners and no zeros therefore board is full and it is a draw
+        board.print_output_code(0)
 
 
 if __name__ == '__main__':
