@@ -25,13 +25,7 @@ What I found Challenging
 
 What I would like to improve
 
-1. the 'win' functions are the same apart from
-     a. the numbers used to change the index positions to check
-     b. column and row starting positions
-
-   so rather then having 7 win validation functions, simply have one function and pass the changes
-
-2. i think for very large board config (X, Y, Z) with very large values (guessing >10,000), the script will take a
+1. i think for very large board config (X, Y, Z) with very large values (guessing >10,000), the script will take a
    very long time and consume lots of memory so benchmark with very large numbers and try to improve performance
    Some improvements I can think of:
 
