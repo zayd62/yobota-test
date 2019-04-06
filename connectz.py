@@ -97,25 +97,23 @@ class ConnectBoard:
 
     def find_winner(self, column, row):
         """
-        Given a position within the board, it finds a winner. Uses all the win checking helper functions to find a
-        winner and print the appropriate output code
-
-        Note: there is no method for checking a win for vertical down as you cant insert a counter below another counter
+        Given a position within the board, it finds a winner. Uses self.win_check() to find winner and
+        print the appropriate output code
 
         Args:
             column (int): the column number
             row (int): the row number
         """
+        # Since there are multiple directions to win a game, all directions are checked and inserted into a list
         results = []
 
-        # add the results of all the win checks into an array
-        results.append(self.win_horizontal_left(column, row))
-        results.append(self.win_horizontal_right(column, row))
-        results.append(self.win_vertical_down(column, row))
-        results.append(self.win_diagonal_upper_right(column, row))
-        results.append(self.win_diagonal_upper_left(column, row))
-        results.append(self.win_diagonal_lower_right(column, row))
-        results.append(self.win_diagonal_lower_left(column, row))
+        results.append(self.win_check(column, row, -1, 0))  # for horizontal left
+        results.append(self.win_check(column, row, 1, 0))  # for horizontal right
+        results.append(self.win_check(column, row, 0, 1))  # for vertical down
+        results.append(self.win_check(column, row, 1, -1))  # for diagonal upper right
+        results.append(self.win_check(column, row, -1, -1))  # for diagonal upper left
+        results.append(self.win_check(column, row, 1, 1))  # for diagonal lower right
+        results.append(self.win_check(column, row, -1, 1))  # for diagonal lower left
 
         # if true, player 1 won
         if 1 in results:
@@ -168,441 +166,64 @@ class ConnectBoard:
 
     # below are all the win checking helper functions
 
-    def win_horizontal_left(self, column, row):
+    def win_check(self, column_start_point, row_start_point, column_offset, row_offset):
         """
-        This function given a column and a row, check to see if there is a solution in the horizontal left of from the
-        starting point.
+        This function given a starting point in the board will attempt to find a winner by checking the the cells
+        determined by the offset
 
+        The offset determines which direction the program will move across the board to find the next counter. The
+        number of counters checked is determined by self.config[2] which states the number of counters needed for a win
 
-        A horizontal left victory looks like the following (starting from cell 4,7)::
+        Below is a table of the different directions to check for a win:
 
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
+         ====================== ==================================== =============== ============
+                Win Type                    Description               Column Offset   Row Offset
+         ====================== ==================================== =============== ============
+          Horizontal Left        Move one to the left                 -1              0
+          Horizontal Right       Move one to the right                +1              0
+          Vertical Down          Move one down                        0               +1
+          Diagonal Upper Right   Move one to the right and one up     +1              -1
+          Diagonal Upper Left    Move one to the left and one up      -1              -1
+          Diagonal Lower Right   Move one to the right and one down   +1              +1
+          Diagonal Lower Left    Move one to the left and one up      -1              +1
+         ====================== ==================================== =============== ============
+
+        Note: we dont check Vertical Up as that would mean that a counter is inserted underneath another counter which
+        is not possible
 
         Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
+            column_start_point (int): the column number where the program will start
+            row_start_point (int): the row number where the program will start
+            column_offset (int): the number of rows the program will move to find the next counter to check
+            row_offset (int): the number of rows the program will move to find the next counter to check
 
         Returns:
-            bool: true if there is a victory, false otherwise
+            int: If player one inserted a winning move, then a 1 is returned, 2 is returned for player two and 0 if
+            there are no winners
         """
 
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
+        # determine which player inserted a counter. The board stores which player inserted a counter
         if self.player_one_move:
             number_to_find = 1
         else:
             number_to_find = 2
 
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a -1 list index starts from the end of the list but -1 means
-        # checking a cell that does not exist in this example
-
+        # looks through the board which is a nested list
+        # depending on the offset, the offset may ask to check a cell that does not exist.
+        # e.g for config ``7 7 4`` the cell ``8,8`` does not exist and trying to check that cell will throw an index
+        # error. The offset may also produce negative numbers, negative numbers are valid index position in lists
+        # and are interpreted as starting from the end of the list but in our situation, a negative value eg; ``-1,2``
+        # is checking a cell that does not exist. For all the conditions mentioned above, we return a 0 which means
+        # 'no winnner'
         try:
             for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
+                if column_start_point < 0 or row_start_point < 0:
                     return 0
-                if self.board[row][column] == number_to_find:
-                    column -= 1
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_horizontal_right(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the horizontal right of from the
-        starting point.
-
-
-        A horizontal right victory looks like the following (starting from cell 4,7)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    column += 1  # this will ensure that the cell of the right is checked next
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_vertical_down(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the vertical down from the
-        starting point.
-
-        A vertical down  victory looks like the following (starting from cell 4,4)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    row += 1  # this will ensure that the below is checked next
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_diagonal_upper_right(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the diagonal upper right from the
-        starting point.
-
-
-        A diagonal upper right victory looks like the following (starting from cell 3,7)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0 or row < 0`` because in python, a ``-1`` list index starts from the end of the list
-        # but ``-1`` means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    # this will ensure that the cell up and to the right is checked
-                    row += -1
-                    column += 1
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_diagonal_upper_left(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the diagonal upper left from the
-        starting point.
-
-
-        A diagonal upper left victory looks like the following (starting from cell 4,7)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    # this will ensure that the cell up and to the right is checked
-                    row += -1
-                    column += -1
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_diagonal_lower_right(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the diagonal lower right from the
-        starting point.
-
-
-        A diagonal lower right victory looks like the following (starting from cell 1,4)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    # this will ensure that the cell down and to the right is checked
-                    row += 1
-                    column += 1
-                else:
-                    return 0
-            return number_to_find
-        except IndexError:
-            return 0
-
-    def win_diagonal_lower_left(self, column, row):
-        """
-        This function given a column and a row, check to see if there is a solution in the diagonal lower left from the
-        starting point.
-
-
-        A diagonal lower left victory looks like the following (starting from cell 7,4)::
-
-            .---.---.---.---.---.---.---.
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-            :---+---+---+---+---+---+---:
-            | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-            '---'---'---'---'---'---'---'
-
-        Args:
-            column (int): the point in the column where you start looking
-            row (int): the point in the row where you start looking
-
-        Returns:
-            int: player number of who won, 0 if no one won
-        """
-
-        # boolean self.player_one_move determines whose move it is, True is player 1, false is player 2
-        if self.player_one_move:
-            number_to_find = 1
-        else:
-            number_to_find = 2
-
-        # self.config[2] determines the number of counters needed to win so we need to check that many times
-        # assuming number_to_find = 1, we check for 1's, self.config[2] times
-        # if found, return True, false otherwise
-
-        # we put it in a try-except because we may get an IndexError because we may access cells that do not exist
-        # for the example in docstring, if we start a 1,7 and we need 4 to win, checking the second cell will be a cell
-        # that does not exist which will then raise an IndexError. if this happens, we return false
-        # as a win cannot happen
-
-        # we also have ``column < 0`` because in python, a ``-1`` list index starts from the end of the list but ``-1``
-        # means checking a cell that does not exist in this example
-
-        try:
-            for i in range(0, self.config[2]):
-                if column < 0 or row < 0:
-                    return 0
-                if self.board[row][column] == number_to_find:
-                    # this will ensure that the cell down and to the right is checked
-                    row += 1
-                    column += -1
+                if self.board[row_start_point][column_start_point] == number_to_find:
+                    # modifying the start points so that it checks the next cell
+                    # the cell checked next is determined by the offset
+                    column_start_point += column_offset
+                    row_start_point += row_offset
                 else:
                     return 0
             return number_to_find
